@@ -6,7 +6,7 @@
       "use": "@vercel/node",
       "config": {
         "rewrite": {
-          "source": "/api/hello",
+          "source": "/api/hello?name=:name",
           "destination": "/index.js"
         }
       }
