@@ -21,7 +21,7 @@ const GeolocationParams = require("ip-geolocation-api-javascript-sdk/Geolocation
 
 
 app.get("/api/hello", (req,res) => {
-    const {name} = req.query;
+    const {name} = req.query.name;
     const geolocationParams = new GeolocationParams();
     geolocationParams.setExcludes("continent_name,connection_type,longitude,country_emoji,organization,currency,country_code3,time_zone,continent_code,country_code2,country_name,country_name_official,country_capital,state_prov,state_code,district,zipcode,latitude,is_eu,calling_code,country_tld,languages,country_flag,geoname_id,isp");
     const location = ipGeolocationAPI.getGeolocation(handleResponse, geolocationParams);
