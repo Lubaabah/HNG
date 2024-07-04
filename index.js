@@ -46,6 +46,4 @@ app.get("/api/hello", (req,res) => {
 
 
 
-app.listen(Port, ()=> {
-    console.log("Server is running...")
-});
+module.exports = app;
