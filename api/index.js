@@ -2,7 +2,7 @@ require("dotenv").config();
 
 const Express = require("express");
 const app = Express();
-
+const cors = require("cors");
 const Port = 3000;
 
 
@@ -11,6 +11,8 @@ const IPGeolocationAPI = require("ip-geolocation-api-javascript-sdk");
 
 let weather = new OpenWeatherAPI({ key: process.env.WEATHER_KEY});
 const ipGeolocationAPI = new IPGeolocationAPI(process.env.GEOLOCATION_KEY);
+
+app.use(cors());
 
 function handleResponse(json){
     return json
