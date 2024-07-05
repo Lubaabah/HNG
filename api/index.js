@@ -32,7 +32,8 @@ app.get("/api/hello", (req,res) => {
         const ip = response.ip;
         const city = response.city;
 
-        if (city) {
+        if (response && response.city) {
+            const city = response.city;
             weather.setLocationByName(city);
 
             weather.getCurrent().then(data => {
