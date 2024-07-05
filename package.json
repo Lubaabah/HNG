@@ -9,10 +9,15 @@
   },
   "name": "hng",
   "version": "1.0.0",
+<<<<<<< HEAD
   "main": "index.js",
+=======
+  "main": "api/index.js",
+  "devDependencies": {},
+>>>>>>> f3e016c950bde8622f3fcd51639f04f76fef260f
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js",
+    "start": "node api/index.js",
     "dev": "nodemon index.js"
   },
   "author": "Fatihah Situ",
