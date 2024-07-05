@@ -32,17 +32,24 @@ app.get("/api/hello", (req,res) => {
         const ip = response.ip;
         const city = response.city;
 
-        weather.setLocationByName(city);
+        if (city) {
+            weather.setLocationByName(city);
 
-        weather.getCurrent().then(data => {
-            const output = {
-                "client_ip": ip,
-                "location": city,
-                "greeting": `Hello, ${name}! The temperature in ${city} is ${data.weather.temp.cur}\u00B0F.`
-            };
+            weather.getCurrent().then(data => {
+                const output = {
+                    "client_ip": ip,
+                    "location": city,
+                    "greeting": `Hello, ${name}! The temperature in ${city} is ${data.weather.temp.cur}\u00B0F.`
+                };
 
-            res.send(output);
-        });
+                res.send(output);
+            }).catch(error => {
+                res.status(500).send({ error: "Error fetching weather data" });
+            });
+        } else {
+            res.status(500).send({ error: "City information not available" });
+        }
     }, geolocationParams);
-    });
+});
+
 module.exports = app;
