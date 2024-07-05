@@ -43,9 +43,4 @@ app.get("/api/hello", (req,res) => {
         });
     }, geolocationParams);
     });
-
-
-
-app.listen(Port, () => {
-    console.log("Server is running...");
-});
+module.exports = app;
