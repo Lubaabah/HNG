@@ -2,47 +2,69 @@ require("dotenv").config();
 
 const Express = require("express");
 const app = Express();
+
+const axios = require('axios');
 const cors = require("cors");
 const Port = 3000;
 
-
-const { OpenWeatherAPI } = require("openweather-api-node");
-const IPGeolocationAPI = require("ip-geolocation-api-javascript-sdk");
-
-let weather = new OpenWeatherAPI({ key: process.env.WEATHER_KEY});
-const ipGeolocationAPI = new IPGeolocationAPI(process.env.GEOLOCATION_KEY);
-
 app.use(cors());
 
-function handleResponse(json){
-    return json
-};
 
 
-const GeolocationParams = require("ip-geolocation-api-javascript-sdk/GeolocationParams");
+const IPINFO_API_KEY = process.env.IPIN_INFO_TOKEN;
+const OPENWEATHER_API_KEY = process.env.WEATHER_KEY;
 
-
-app.get("/api/hello", (req,res) => {
+app.get('/api/location-weather', async (req, res) => {
     const {name} = req.query;
-    const geolocationParams = new GeolocationParams();
-    geolocationParams.setExcludes("continent_name,connection_type,longitude,country_emoji,organization,currency,country_code3,time_zone,continent_code,country_code2,country_name,country_name_official,country_capital,state_prov,state_code,district,zipcode,latitude,is_eu,calling_code,country_tld,languages,country_flag,geoname_id,isp");
-    const location = ipGeolocationAPI.getGeolocation(handleResponse, geolocationParams);
+    try {
+        // Get IP address
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        console.log(`Detected IP address: ${ip}`);
 
-    ipGeolocationAPI.getGeolocation((response) => {
-        const ip = response.ip;
-        const city = response.city;
+        // Get location details using IP
+        const ipInfoUrl = `https://ipinfo.io/${ip}?token=${IPINFO_API_KEY}`;
+        const ipInfoResponse = await axios.get(ipInfoUrl);
+        const { city, region, country, loc } = ipInfoResponse.data;
+        
+        if (!loc) {
+            throw new Error('Location data not found');
+        }
 
-        weather.setLocationByName(city);
+        const coordinates = loc.split(',');
+        if (coordinates.length !== 2) {
+            throw new Error('Invalid location format');
+        }
 
-        weather.getCurrent().then(data => {
-            const output = {
-                "client_ip": ip,
-                "location": city,
-                "greeting": `Hello, ${name}! The temperature in ${city} is ${data.weather.temp.cur}\u00B0F.`
-            };
+        // Get weather details using location coordinates
+        const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${OPENWEATHER_API_KEY}&units=metric`;
+        const weatherResponse = await axios.get(weatherUrl);
+        const weatherData = weatherResponse.data;
 
-            res.send(output);
-        });
-    }, geolocationParams);
-    });
-module.exports = app;
+        // Construct response
+        const response = {
+            ip,
+            location: {
+                city,
+                region,
+                country,
+                coordinates: {
+                    latitude: lat,
+                    longitude: lon,
+                },
+            },
+            weather: {
+                temperature: weatherData.main.temp,
+                description: weatherData.weather[0].description,
+            },
+        };
+
+        res.json(response);
+    } catch (error) {
+        console.error('Error fetching location or weather data:', error);
+        res.status(500).json({ error: 'Failed to fetch location or weather data' });
+    }
+});
+
+app.listen(Port, () => {
+    console.log(`Server is running on port ${Port}`);
+});
